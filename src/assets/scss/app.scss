@@ -1,0 +1,514 @@
+@use "./global/app" as *;
+
+// foundation
+@use "./foundation/root";
+@use "./foundation/reset";
+
+// utility
+@use "./other/utility";
+
+// --------------------------
+
+html,
+body {
+  overflow: hidden;
+  background: var(--black);
+}
+
+body {
+  &[data-status=""] {
+    cursor: wait;
+  }
+}
+
+.lil-gui {
+  @include sp_w() {
+    display: none !important;
+  }
+}
+
+#world {
+  pointer-events: none;
+  user-select: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  width: 100vw;
+  height: 100vh;
+  height: calc(var(--vh, 1vh) * 100);
+  canvas {
+    cursor: grab;
+    &:active {
+      cursor: grabbing;
+    }
+  }
+
+  opacity: 0;
+  body[data-status="enter"] & {
+    pointer-events: initial;
+    user-select: initial;
+    transition: 1s ease opacity;
+    opacity: 1;
+  }
+}
+
+// --------------------------
+
+// wheel示唆
+
+// --------------------------
+.c-wheelSuggestion {
+  pointer-events: none;
+  user-select: none;
+  position: fixed;
+  left: max(16px, liquid(16));
+  bottom: max(48px, liquid(48));
+  z-index: 100;
+  width: max-content;
+  height: max-content;
+  padding-left: max(8px, liquid(8));
+  @include sp_w() {
+    right: min(16px, liquid(16));
+    padding-left: min(8px, liquid(8));
+  }
+  @media (hover: none) {
+    display: none;
+  }
+
+  opacity: 0;
+  body[data-status="enter"] & {
+    transition: 0.6s 0.4s ease opacity;
+    opacity: 1;
+  }
+}
+.c-wheelSuggestion__text {
+  color: var(--white);
+  font-family: var(--ja);
+  line-height: 100%;
+  font-size: max(12px, liquid(12));
+  line-height: 100%;
+  font-weight: bold;
+  writing-mode: vertical-rl;
+  @include sp_w() {
+    font-size: min(12px, liquid(12));
+  }
+}
+.c-wheelSuggestion__line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  margin: auto;
+  height: 100%;
+  width: 2px;
+  background: var(--white);
+  animation: 3s $easeinout isLoopY infinite;
+  transform: scale(1, 1);
+  transform-origin: top;
+}
+@keyframes isLoopY {
+  0% {
+    transform: scale(1, 0);
+    transform-origin: top;
+  }
+  49% {
+    transform: scale(1, 1);
+    transform-origin: top;
+  }
+  51% {
+    transform: scale(1, 1);
+    transform-origin: bottom;
+  }
+  100% {
+    transform: scale(1, 0);
+    transform-origin: bottom;
+  }
+}
+
+// --------------------------
+
+// drag示唆
+
+// --------------------------
+.c-dragSuggestion {
+  pointer-events: none;
+  user-select: none;
+  position: fixed;
+  left: max(48px, liquid(48));
+  bottom: max(20px, liquid(20));
+  z-index: 100;
+  width: max-content;
+  height: max-content;
+  padding-bottom: max(8px, liquid(8));
+  @include pc_w() {
+    body:not(.pc) & {
+      left: max(20px, liquid(20));
+    }
+  }
+  @include sp_w() {
+    left: 0;
+    right: 0;
+    margin: auto;
+    // bottom: min(40px, liquid(40));
+    bottom: min(80px, liquid(80));
+  }
+
+  opacity: 0;
+  body[data-status="enter"] & {
+    transition: 0.6s 0.4s ease opacity;
+    opacity: 1;
+  }
+}
+.c-dragSuggestion__text {
+  color: var(--white);
+  font-family: var(--ja);
+  line-height: 100%;
+  font-size: max(12px, liquid(12));
+  line-height: 100%;
+  font-weight: bold;
+  @include sp_w() {
+    font-size: min(12px, liquid(12));
+  }
+}
+.c-dragSuggestion__line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: auto;
+  height: 2px;
+  width: 100%;
+  background: var(--white);
+  animation: 3s $easeinout isLoopX infinite;
+  transform: scale(1, 1);
+  transform-origin: left;
+}
+@keyframes isLoopX {
+  0% {
+    transform: scale(0, 1);
+    transform-origin: left;
+  }
+  49% {
+    transform: scale(1, 1);
+    transform-origin: left;
+  }
+  51% {
+    transform: scale(1, 1);
+    transform-origin: right;
+  }
+  100% {
+    transform: scale(0, 1);
+    transform-origin: right;
+  }
+}
+
+// --------------------------
+
+// ナビゲーション
+
+// --------------------------
+button {
+  outline: none;
+  margin: 0;
+  padding: 0;
+}
+
+.l-navi {
+  user-select: none;
+  position: fixed;
+  top: 0;
+  right: max(16px, liquid(16));
+  bottom: 0;
+  z-index: 9999;
+  margin: auto;
+  width: max-content;
+  height: max-content;
+  @include sp_w() {
+    display: flex;
+    align-items: center;
+    top: initial;
+    bottom: min(40px, liquid(40));
+    right: 0;
+    left: 0;
+    margin: auto;
+    width: max-content;
+    gap: min(8px, liquid(8));
+  }
+  .c-btn {
+    @include pc_w() {
+      &:nth-of-type(1) {
+        margin-bottom: max(16px, liquid(16));
+      }
+      &:nth-last-of-type(1) {
+        margin-top: max(16px, liquid(16));
+      }
+    }
+    @include sp_w() {
+      .c-btn__text {
+        transform: rotateZ(-90deg);
+      }
+    }
+  }
+
+  opacity: 0;
+  body[data-status="enter"] & {
+    transition: 0.6s 0.4s ease opacity;
+    opacity: 1;
+  }
+}
+
+// ボタン
+.c-btn {
+  cursor: pointer;
+  position: relative;
+  z-index: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: initial;
+  width: max(24px, liquid(24));
+  height: max(24px, liquid(24));
+  border: solid max(2px, liquid(2)) var(--white);
+  font-size: max(10px, liquid(10));
+  @include sp_w() {
+    width: min(32px, liquid(32));
+    height: min(32px, liquid(32));
+    border: solid min(2px, liquid(2)) var(--white);
+  }
+
+  opacity: 1;
+  @include hover() {
+    transition: 0.4s ease opacity;
+    opacity: 0.5;
+  }
+}
+.c-btn__bg {
+  pointer-events: none;
+  user-select: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+  margin: auto;
+  width: 101%;
+  height: 101%;
+  transform: scale(1, 0);
+  transform-origin: bottom;
+  background: var(--white);
+  transition: 0.4s $easeinout transform;
+}
+.c-btn__text {
+  pointer-events: none;
+  user-select: none;
+  position: relative;
+  z-index: 2;
+  color: var(--white);
+  font-size: max(10px, liquid(10));
+  width: max-content;
+  height: max-content;
+  margin: 0;
+  mix-blend-mode: difference;
+  @include sp_w() {
+    font-size: min(10px, liquid(10));
+  }
+}
+
+// ボタン next
+.c-btn-next {
+  &.is-active {
+    .c-btn__bg {
+      transform: scale(1, 1);
+      transition: 3s linear transform;
+    }
+  }
+}
+
+// ナビ
+.c-navi {
+  position: relative;
+  cursor: pointer;
+  width: max(24px, liquid(24));
+  height: max(8px, liquid(8));
+  border: solid max(1px, liquid(1)) var(--white);
+  box-sizing: border-box;
+  transition: 0.4s ease opacity;
+  background: rgba(#fff, 0);
+  @include pc_w() {
+    margin: auto;
+    margin-top: max(8px, liquid(8));
+
+    &:nth-of-type(1) {
+      margin-top: 0;
+    }
+  }
+  @include sp_w() {
+    width: min(32px, liquid(32));
+    height: min(32px, liquid(32));
+    border: solid min(2px, liquid(2)) var(--white);
+  }
+  &::before {
+    pointer-events: none;
+    user-select: none;
+    content: "";
+    position: absolute;
+    top: 0%;
+    left: 0%;
+    right: 0;
+    bottom: 0;
+    z-index: 0;
+    margin: auto;
+    width: 102%;
+    height: 102%;
+    background: var(--white);
+    transform: scale(1, 0);
+    transform-origin: bottom;
+    transition: 1.2s $easeinout transform;
+  }
+
+  &.is-active {
+    &::before {
+      transform: scale(1, 1);
+    }
+  }
+  @include hover() {
+    opacity: 0.5;
+  }
+}
+
+// --------------------------
+
+// タイトル
+
+// --------------------------
+.c-title {
+  pointer-events: none;
+  user-select: none;
+  position: fixed;
+  top: max(20px, liquid(20));
+  left: max(20px, liquid(20));
+  z-index: 5000;
+  @include sp_w() {
+    top: min(12px, liquid(12));
+    left: min(12px, liquid(12));
+  }
+  span {
+    display: inline-block;
+    font-family: var(--ja);
+    line-height: 100%;
+    font-weight: bold;
+    width: max-content;
+    color: var(--white);
+
+    &:nth-of-type(1) {
+      font-size: max(54px, liquid(54));
+      letter-spacing: max(-2px, liquid(-2));
+      @include sp_w() {
+        font-size: min(32px, liquid(32));
+        letter-spacing: max(-2px, liquid(-2));
+      }
+    }
+    &:nth-of-type(2) {
+      font-size: max(24px, liquid(24));
+      line-height: 160%;
+      @include sp_w() {
+        font-size: min(20px, liquid(20));
+      }
+    }
+  }
+}
+
+// --------------------------
+
+// コピーライト
+
+// --------------------------
+.c-copyright {
+  user-select: none;
+  position: fixed;
+  bottom: max(16px, liquid(16));
+  left: 0;
+  right: 0;
+  margin: auto;
+  z-index: 2000;
+  display: block;
+  font-size: max(12px, liquid(12));
+  font-family: var(--ja);
+  line-height: 100%;
+  font-weight: bold;
+  width: max-content;
+  color: var(--white);
+
+  @include sp_w() {
+    right: 0;
+    left: 0;
+    bottom: min(16px, liquid(16));
+    font-size: min(12px, liquid(12));
+    margin: auto;
+  }
+  &::before {
+    pointer-events: none;
+    user-select: none;
+    content: "";
+    position: absolute;
+    bottom: max(-6px, liquid(-6));
+    left: 0;
+    z-index: 0;
+    transform: translate3d(0, 0, 0px);
+    height: 2px;
+    width: 100%;
+    background: var(--white);
+    transform: scale(0, 1);
+    transform-origin: left;
+    transition: 0.4s $easeinout transform;
+    @include sp_w() {
+      bottom: min(-4px, liquid(-4));
+    }
+  }
+  @include hover() {
+    &::before {
+      transform: scale(1, 1);
+    }
+  }
+  opacity: 0;
+  body[data-status="enter"] & {
+    transition: 0.6s 0.4s ease opacity;
+    opacity: 1;
+  }
+}
+
+// --------------------------
+
+// GitHub
+
+// --------------------------
+.c-github {
+  user-select: none;
+  position: fixed;
+  right: max(16px, liquid(16));
+  bottom: max(16px, liquid(20));
+  z-index: 2000;
+  width: max(20px, liquid(20));
+  height: max(20px, liquid(20));
+  display: flex;
+  align-items: center;
+  @include sp_w() {
+    bottom: min(12px, liquid(12));
+    right: min(12px, liquid(12));
+  }
+  svg {
+    pointer-events: none;
+    user-select: none;
+    width: 100%;
+    height: 100%;
+    fill: var(--white);
+  }
+
+  opacity: 0;
+  body[data-status="enter"] & {
+    transition: 0.4s ease opacity;
+    opacity: 1;
+  }
+}
