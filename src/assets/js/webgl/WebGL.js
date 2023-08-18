@@ -1,65 +1,82 @@
-// --------------------------
-
-// lib
-
-// --------------------------
-import { SetControls } from "./lib/SetControls";
-import { SetStats } from "./lib/SetStats";
-import { SetGui } from "./lib/SetGui";
-
-// --------------------------
-
 // module
-
-// --------------------------
 import { Stage } from "./Stage";
-import { Mesh } from "./Mesh";
+import { ObjectPlane } from "./ObjectPlane";
 
 export class WebGL {
-  constructor(body, params, bool) {
-    // props
-    this.body = body;
+  constructor(params) {
     this.params = params;
-    this.bool = bool;
 
-    // bool
-    this.isInit = false;
+    this.vector = {
+      x: {
+        target: 0,
+        current: 0,
+      },
+      y: {
+        target: 0,
+        current: 0,
+      },
+      ease: 0.2,
+    };
 
-    // lib
-    this.gui = new SetGui();
-    this.stats = new SetStats(body);
+    this.stage = new Stage(params, false, false);
+    this.stage.init(document.getElementById("webgl"), params.w, params.h);
+    this.plane = new ObjectPlane(params, this.stage);
 
-    // module
-    this.stage = new Stage(params, bool);
-    this.mesh = new Mesh(body, params, bool, this.stage);
-    this.controls = new SetControls(this.stage);
-  }
+    this.raf = this.raf.bind(this);
 
-  raf(time) {
-    if (this.isInit) {
-      this.mesh.raf(time);
-      this.stage.raf();
-      this.controls.update();
-      this.stats.raf();
+    if (window.matchMedia("(hover: hover)").matches) {
+      window.addEventListener("mousemove", this.onMove.bind(this), {
+        passive: true,
+      });
+    } else {
+      window.addEventListener("touchmove", this.onMove.bind(this), {
+        passive: true,
+      });
     }
   }
 
-  resize(props) {
-    if (this.isInit) {
-      this.bool.isMatchMediaWidth = props.isMatchMediaWidth;
-      this.params.w = props.w;
-      this.params.h = props.h;
-      this.params.aspect = props.aspect;
-      this.params.shorter = props.shorter;
-      this.params.longer = props.longer;
+  /**
+   * 線形補間
+   * https://ja.wikipedia.org/wiki/%E7%B7%9A%E5%BD%A2%E8%A3%9C%E9%96%93
+   * @param {number} start
+   * @param {number} end
+   * @param {number} ease
+   * @returns {number} 補完した値
+   */
+  lerp(start, end, ease) {
+    return start * (1 - ease) + end * ease;
+  }
 
-      this.mesh.resize(props);
-      this.stage.resize(props);
-    }
+  onMove(e) {
+    const x = e.touches ? e.touches[0].clientX : e.clientX;
+    const y = e.touches ? e.touches[0].clientY : e.clientY;
+
+    this.vector.x.target = (x / this.params.w) * 2 - 1;
+    this.vector.y.target = -(y / this.params.h) * 2 + 1;
+
+    this.plane.onMove(this.vector);
+  }
+
+  raf() {
+    const time = performance.now() * 0.001;
+
+    this.vector.x.current = this.lerp(this.vector.x.current, this.vector.x.target, this.vector.ease);
+    this.vector.y.current = this.lerp(this.vector.y.current, this.vector.y.target, this.vector.ease);
+
+    this.stage.raf();
+    this.plane.raf(time, this.vector);
+  }
+
+  resize(params) {
+    this.params.w = this.params.w;
+    this.params.h = this.params.h;
+
+    this.stage.resize(params.w, params.h);
+    this.plane.resize(params);
   }
 
   init() {
-    console.log("🚀 ~ WebGL");
-    this.isInit = true;
+    console.log("🚀 ~ WebGL init");
+    this.plane.init();
   }
 }

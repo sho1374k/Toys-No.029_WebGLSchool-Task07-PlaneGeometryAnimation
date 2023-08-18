@@ -1,151 +1,117 @@
-import * as THREE from "three";
+// lib
+import { WebGLMath } from "./doxas/WebGLMath.js";
+import { WebGLOrbitCamera } from "./doxas/WebGLOrbitCamera";
 
 export class Stage {
-  constructor(params, bool) {
-    // props
-    this.params = params;
-    this.bool = bool;
-
-    // init
-    this.scene = null;
+  constructor(params, isClearColor = true, isOrbitCamera = true) {
+    this.gl = null; // WebGLRenderingContext
+    this.canvas = null; // HTMLCanvasElement
     this.camera = null;
-    this.renderer = null;
-    this.controls = null;
-    this.stats = null;
+    this.isClearColor = isClearColor;
+    this.isOrbitCamera = isOrbitCamera;
+    this.params = params;
+    this.params.color = {
+      r: 1,
+      g: 1,
+      b: 1,
+      a: 1,
+    };
 
-    this.init();
+    this.v3 = WebGLMath.Vec3;
+    this.m4 = WebGLMath.Mat4;
   }
 
-  init() {
-    this.setRenderer();
-    this.setScene();
-    this.setCamera();
-    // this.setFog();
-  }
-
-  updateRenderer() {
-    this.renderer.setSize(this.params.w, this.params.h);
-    this.renderer.setPixelRatio(Math.min(2, window.devicePixelRatio));
-  }
-
-  setRendererLight() {
-    this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.needsUpdate = true;
-    this.renderer.shadowMap.autoUpdate = true;
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    // this.renderer.toneMapping = THREE.CineonToneMapping;
-    // this.renderer.shadowMap.type = THREE.BasicShadowMap
-    // this.renderer.shadowMap.type = THREE.PCFShadowMap
-    // this.renderer.shadowMap.type = THREE.PCFSoftShadowMap
-    // this.renderer.shadowMap.type = THREE.VSMShadowMap
-    this.renderer.outputEncoding = THREE.sRGBEncoding;
-    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1; //1.75
-    // this.renderer.physicallyCorrectLights = true;
-  }
-
-  setRenderer() {
-    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    this.renderer.shadowMap.enabled = true;
-    // this.setRendererLight();
-    this.updateRenderer();
-
-    const wrap = document.getElementById("world");
-    wrap.appendChild(this.renderer.domElement);
-  }
-
-  setScene() {
-    this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color("#161616");
-    // if (GUI != null) {
-    //   const scene = GUI.addFolder("scene");
-    //   // scene.close();
-    //   scene
-    //     .addColor(this.scene, "background")
-    //     .name("background")
-    //     .onChange((value) => {
-    //       this.scene.background = new THREE.Color(value);
-    //     });
-    // }
-
-    // SceneHelper
-    // if (MODE) {
-    //   this.scene.add(new THREE.GridHelper(1000, 100));
-    //   this.scene.add(new THREE.AxesHelper(100));
-    // }
-  }
-
-  updateFog() {
-    this.scene.fog.far = this.params.shorter * 3;
-  }
-
-  setFog() {
-    this.scene.fog = new THREE.Fog(0x1e0101, 10, this.params.shorter * 3);
-    if (GUI != null) {
-      const fog = GUI.addFolder("fog");
-      fog
-        .addColor(this.scene.fog, "color")
-        .name("color")
-        .onChange((value) => {
-          this.scene.fog.color = new THREE.Color(value);
-        });
-      fog
-        .add(this.scene.fog, "near", 0, 100)
-        .name("near")
-        .onChange((value) => {
-          this.scene.fog.near = value;
-        });
-      fog
-        .add(this.scene.fog, "far", 1, this.params.shorter * 10)
-        .name("far")
-        .onChange((value) => {
-          this.scene.fog.far = value;
-        });
+  createWebGLContext() {
+    // WebGL コンテキストを初期化する
+    const gl = this.canvas.getContext("webgl");
+    if (gl == null) {
+      throw new Error("webgl not supported");
+      return null;
+    } else {
+      return gl;
     }
   }
 
-  updateCamera() {
-    this.configCamera.far = (this.params.h * 0.5) / Math.tan(this.configCamera.fov * 0.5 * (Math.PI / 180));
+  /**
+   * canvasのサイズを設定
+   * @param {number} w
+   * @param {number} h
+   */
+  setSize(w = window.innerWidth, h = window.innerHeight) {
+    this.canvas.width = w;
+    this.canvas.height = h;
+  }
 
-    this.camera.lookAt(new THREE.Vector3(0, 0, 0));
-    this.camera.aspect = this.params.w / this.params.h;
-    this.camera.position.z = this.configCamera.far;
-    this.camera.far = this.configCamera.far * 4;
+  /**
+   * canvas内でのWebGLのviewportの設定
+   * @param {number} x
+   * @param {number} y
+   * @param {number} w
+   * @param {number} h
+   */
+  setViewport(x = 0, y = 0, w = this.canvas.width, h = this.canvas.height) {
+    this.gl.viewport(x, y, w, h);
+  }
 
-    this.camera.updateProjectionMatrix();
+  /**
+   * クリアする色を設定
+   * @param {object} color {r, g, b, a};
+   */
+  setClearColor(color = { r: 1, g: 1, b: 1, a: 1 }) {
+    this.params.color = color;
+    this.gl.clearColor(this.params.color.r, this.params.color.g, this.params.color.b, this.params.color.a);
+    this.gl.clearDepth(1.0);
+    // this.gl.clear(this.gl.COLOR_BUFFER_BIT);
+    this.gl.clear(gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
   }
 
   setCamera() {
-    this.configCamera = {
-      fov: 60,
-      aspect: this.params.w / this.params.h,
-      near: 1,
-      far: (this.params.h * 0.5) / Math.tan(60 * 0.5 * (Math.PI / 180)),
-    };
+    if (this.isOrbitCamera) {
+      this.camera = new WebGLOrbitCamera(this.canvas, {
+        distance: 5.0, // Z 軸上の初期位置までの距離
+        min: 0.1, // カメラが寄れる最小距離
+        max: 10.0, // カメラが離れられる最大距離
+        move: 2.0, // 右ボタンで平行移動する際の速度係数
+      });
+    } else {
+      const eye = this.v3.create(0.0, 0.0, 5.0); // カメラの位置
+      const center = this.v3.create(0.0, 0.0, 0.0); // カメラの注視点
+      const upDirection = this.v3.create(0.0, 1.0, 0.0); // カメラの天面の向き
+      this.camera = this.m4.lookAt(eye, center, upDirection);
+      this.camera.position = eye;
+    }
+  }
 
-    this.camera = new THREE.PerspectiveCamera(
-      this.configCamera.fov,
-      this.configCamera.aspect,
-      this.configCamera.near,
-      this.configCamera.far * 4,
-    );
-
-    this.updateCamera();
+  /**
+   * @param {number} w
+   * @param {number} h
+   */
+  resize(w = window.innerWidth, h = window.innerHeight) {
+    this.setSize(w, h);
+    this.setViewport();
   }
 
   raf() {
-    // this.renderer.render(this.scene, this.camera);
+    if (this.isClearColor) {
+      this.setClearColor();
+    } else {
+      this.gl.clearDepth(1.0);
+      this.gl.clear(this.gl.DEPTH_BUFFER_BIT);
+    }
+
+    this.setViewport(0, 0, this.canvas.width, this.canvas.height);
   }
 
-  resize(props) {
-    this.bool.isMatchMediaWidth = props.isMatchMediaWidth;
-    this.params.w = props.w;
-    this.params.h = props.h;
-    this.params.aspect = props.aspect;
-    this.params.shorter = props.shorter;
-    this.params.longer = props.longer;
-
-    this.updateRenderer();
-    this.updateCamera();
+  /**
+   * @param {HTMLElement} canvas WebGLを内包するcanvas要素
+   */
+  init(canvas, w = window.innerWidth, h = window.innerHeight) {
+    console.log("🚀 ~ Stage init");
+    this.canvas = canvas;
+    this.gl = this.createWebGLContext(this.canvas);
+    this.setSize(w, h);
+    this.setViewport(0, 0, this.canvas.width, this.canvas.height);
+    if (this.isClearColor) this.setClearColor();
+    this.setCamera();
   }
 }

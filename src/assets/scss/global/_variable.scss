@@ -1,7 +1,7 @@
 // ---------------------
-//
+
 // screen
-//
+
 // ---------------------
 $screen1: 320;
 $screen2: 375;
@@ -15,17 +15,17 @@ $screen9: 1680;
 $screen10: 1920;
 
 // ---------------------
-//
+
 // responsive
-//
+
 // ---------------------
 $maxWidth: #{$screen4}px;
 $minWidth: #{$screen4 + 1}px;
 
 // ---------------------------------
-//
+
 // easing //https://easings.net/ja
-//
+
 // ---------------------------------
 // ease in
 $easeInSine: cubic-bezier(0.12, 0, 0.39, 0);
@@ -61,9 +61,9 @@ $easeout: $easeOutExpo;
 $easeinout: $easeInOutExpo;
 
 // ---------------------
-//
+
 // hover
-//
+
 // ---------------------
 $hoverTime: 0.4s;
 $hoverEase: $easeOutQuart;

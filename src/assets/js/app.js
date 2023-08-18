@@ -11,124 +11,63 @@ import "../scss/app.scss";
 
 // --------------------------
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-gsap.registerPlugin(ScrollTrigger);
 
 // --------------------------
 
 // module
 
 // --------------------------
-import { Global } from "./module/Global";
-import { Ua } from "./module/Ua";
-import { SetPropertySize } from "./module/SetPropertySize";
-
-// --------------------------
-
-// WebGL
-
-// --------------------------
+import { SetGui } from "./lib/setGui";
 import { WebGL } from "./webgl/WebGL";
 
 // --------------------------
 
-// windows
+// window
 
 // --------------------------
 window.MODE = process.env.NODE_ENV === "development";
 window.GSAP = gsap;
-window.ScrollTrigger = ScrollTrigger;
-window.G = new Global();
 
 window.addEventListener("DOMContentLoaded", (e) => {
-  const BREAK_POINT = 768;
+  new SetGui();
 
-  const body = document.body,
-    ua = new Ua(body);
+  const world = document.getElementById("world");
+  const worldRect = world.getBoundingClientRect();
+
+  const bool = {
+    isMatchMediaHover: window.matchMedia("(hover: hover)").matches,
+  };
 
   const params = {
     w: window.innerWidth,
-    h: window.innerHeight,
-    beforeWidth: window.innerWidth,
-    longer: 0,
-    shorter: 0,
-    aspect: 0,
-  };
-  params.aspect = params.w / params.h;
-  params.longer = params.w > params.h ? params.w : params.h;
-  params.shorter = params.w < params.h ? params.w : params.h;
-
-  const bool = {
-    isMatchMediaWidth: window.matchMedia("(max-width: 768px)").matches,
-    isMatchMediaHover: window.matchMedia("(hover: hover)").matches,
-    isPc: ua.data.device === "pc",
-    isIphone: ua.data.iphone === "iphone",
-    isDeve: MODE, // false
+    h: bool.isMatchMediaHover ? window.innerHeight : worldRect.height,
   };
 
-  const timer = {
-    resize: null,
-    orientation: null,
-  };
+  const webgl = new WebGL(params);
+  webgl.init();
 
-  SetPropertySize(params.w, params.h);
-
-  const webgl = new WebGL(body, params, bool);
-
-  const raf = () => {
-    const time = performance.now() / 1000;
-    webgl.raf(time);
-  };
+  GSAP.ticker.add(webgl.raf);
+  GSAP.ticker.fps(30);
 
   const resize = () => {
-    bool.isMatchMediaWidth = window.matchMedia("(max-width: 768px)").matches;
     params.w = window.innerWidth;
-    params.h = window.innerHeight;
-    params.aspect = params.w / params.h;
-    params.longer = params.w > params.h ? params.w : params.h;
-    params.shorter = params.w < params.h ? params.w : params.h;
+    params.h = bool.isMatchMediaHover ? window.innerHeight : world.getBoundingClientRect().height;
 
-    const props = {
-      isMatchMediaWidth: bool.isMatchMediaWidth,
-      w: params.w,
-      h: params.h,
-      aspect: params.aspect,
-      longer: params.longer,
-      shorter: params.shorter,
+    webgl.resize(params);
+  };
+  resize();
+  window.addEventListener("resize", resize, { passive: true });
+
+  if (bool.isMatchMediaHover) {
+    // 右クリック禁止
+    document.oncontextmenu = function () {
+      return false;
     };
-
-    SetPropertySize(params.w, params.h);
-    webgl.resize(props);
-
-    clearTimeout(timer.resize);
-    timer.resize = setTimeout(() => {
-      const threshold = () => {
-        const w = window.innerWidth;
-        if (w > BREAK_POINT) if (params.beforeWidth < BREAK_POINT + 1) window.location.reload();
-        if (w < BREAK_POINT + 1) if (params.beforeWidth > BREAK_POINT + 1) window.location.reload();
-        params.beforeWidth = w;
-      };
-      threshold();
-    }, 100);
-  };
-
-  const orientation = () => {
-    if (window.orientation != 0) {
-      if (params.w < params.h) {
-        clearTimeout(timer.orientation);
-        timer.orientation = setTimeout(() => {
-          window.location.reload();
-        }, 300);
-      }
-    }
-  };
-
-  document.fonts.ready.then((e) => {
-    webgl.init();
-    GSAP.ticker.add(raf);
-    GSAP.ticker.fps(30);
-    resize();
-    window.addEventListener("resize", resize, { passive: true });
-    if (!bool.isPc) window.addEventListener("orientationchange", orientation);
-  });
+    document.getElementsByTagName("html")[0].oncontextmenu = function () {
+      return false;
+    };
+    document.body.oncontextmenu = function () {
+      return false;
+    };
+  }
 });

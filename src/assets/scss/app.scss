@@ -11,7 +11,6 @@
 
 html,
 body {
-  overflow: hidden;
   background: var(--black);
 }
 
@@ -36,7 +35,6 @@ body {
   z-index: 0;
   width: 100vw;
   height: 100vh;
-  height: calc(var(--vh, 1vh) * 100);
   canvas {
     cursor: grab;
     &:active {
@@ -55,369 +53,188 @@ body {
 
 // --------------------------
 
-// wheel示唆
+// コンテナ
 
 // --------------------------
-.c-wheelSuggestion {
-  pointer-events: none;
-  user-select: none;
-  position: fixed;
-  left: max(16px, liquid(16));
-  bottom: max(48px, liquid(48));
-  z-index: 100;
-  width: max-content;
-  height: max-content;
-  padding-left: max(8px, liquid(8));
-  @include sp_w() {
-    right: min(16px, liquid(16));
-    padding-left: min(8px, liquid(8));
-  }
-  @media (hover: none) {
-    display: none;
-  }
-
+.l-container {
+  position: relative;
+  z-index: 10;
   opacity: 0;
   body[data-status="enter"] & {
-    transition: 0.6s 0.4s ease opacity;
     opacity: 1;
+    transition: 0.3s ease opacity;
   }
 }
-.c-wheelSuggestion__text {
-  color: var(--white);
-  font-family: var(--ja);
-  line-height: 100%;
-  font-size: max(12px, liquid(12));
-  line-height: 100%;
-  font-weight: bold;
-  writing-mode: vertical-rl;
+.l-container__head {
+  border-left: solid 2px var(--white-solid);
+  border-right: solid 2px var(--white-solid);
+  border-top: solid 2px var(--white-solid);
+  border-bottom: solid 1px var(--white-solid);
+  box-sizing: border-box;
+  padding: 32px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
   @include sp_w() {
-    font-size: min(12px, liquid(12));
+    padding: 24px 24px;
   }
 }
-.c-wheelSuggestion__line {
-  position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  margin: auto;
-  height: 100%;
-  width: 2px;
-  background: var(--white);
-  animation: 3s $easeinout isLoopY infinite;
-  transform: scale(1, 1);
-  transform-origin: top;
-}
-@keyframes isLoopY {
-  0% {
-    transform: scale(1, 0);
-    transform-origin: top;
-  }
-  49% {
-    transform: scale(1, 1);
-    transform-origin: top;
-  }
-  51% {
-    transform: scale(1, 1);
-    transform-origin: bottom;
-  }
-  100% {
-    transform: scale(1, 0);
-    transform-origin: bottom;
-  }
-}
-
-// --------------------------
-
-// drag示唆
-
-// --------------------------
-.c-dragSuggestion {
-  pointer-events: none;
-  user-select: none;
-  position: fixed;
-  left: max(48px, liquid(48));
-  bottom: max(20px, liquid(20));
-  z-index: 100;
-  width: max-content;
-  height: max-content;
-  padding-bottom: max(8px, liquid(8));
-  @include pc_w() {
-    body:not(.pc) & {
-      left: max(20px, liquid(20));
-    }
-  }
-  @include sp_w() {
-    left: 0;
-    right: 0;
-    margin: auto;
-    // bottom: min(40px, liquid(40));
-    bottom: min(80px, liquid(80));
-  }
-
-  opacity: 0;
-  body[data-status="enter"] & {
-    transition: 0.6s 0.4s ease opacity;
-    opacity: 1;
-  }
-}
-.c-dragSuggestion__text {
-  color: var(--white);
-  font-family: var(--ja);
-  line-height: 100%;
-  font-size: max(12px, liquid(12));
-  line-height: 100%;
-  font-weight: bold;
-  @include sp_w() {
-    font-size: min(12px, liquid(12));
-  }
-}
-.c-dragSuggestion__line {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  margin: auto;
-  height: 2px;
+.c-title {
   width: 100%;
-  background: var(--white);
-  animation: 3s $easeinout isLoopX infinite;
-  transform: scale(1, 1);
-  transform-origin: left;
-}
-@keyframes isLoopX {
-  0% {
-    transform: scale(0, 1);
-    transform-origin: left;
-  }
-  49% {
-    transform: scale(1, 1);
-    transform-origin: left;
-  }
-  51% {
-    transform: scale(1, 1);
-    transform-origin: right;
-  }
-  100% {
-    transform: scale(0, 1);
-    transform-origin: right;
-  }
-}
-
-// --------------------------
-
-// ナビゲーション
-
-// --------------------------
-button {
-  outline: none;
-  margin: 0;
-  padding: 0;
-}
-
-.l-navi {
-  user-select: none;
-  position: fixed;
-  top: 0;
-  right: max(16px, liquid(16));
-  bottom: 0;
-  z-index: 9999;
-  margin: auto;
-  width: max-content;
-  height: max-content;
+  color: var(--white);
+  font-size: 84px;
+  font-weight: 700;
+  -webkit-text-stroke: 4px var(--white);
+  text-stroke: 4px var(--white);
+  line-height: 100%;
   @include sp_w() {
-    display: flex;
-    align-items: center;
-    top: initial;
-    bottom: min(40px, liquid(40));
-    right: 0;
-    left: 0;
-    margin: auto;
-    width: max-content;
-    gap: min(8px, liquid(8));
+    font-size: 64px;
   }
-  .c-btn {
-    @include pc_w() {
-      &:nth-of-type(1) {
-        margin-bottom: max(16px, liquid(16));
-      }
-      &:nth-last-of-type(1) {
-        margin-top: max(16px, liquid(16));
-      }
-    }
-    @include sp_w() {
-      .c-btn__text {
-        transform: rotateZ(-90deg);
-      }
-    }
+}
+.c-text {
+  margin-top: 8px;
+  color: var(--white);
+  font-size: 14px;
+  font-family: 100;
+  line-height: 160%;
+  @include sp_w() {
+    font-size: 12px;
+    margin-top: 12px;
   }
+}
+.c-text-right {
+  text-align: right;
+}
 
+// --------------------------
+
+// アイテムサイズ
+
+// --------------------------
+#js-rect {
+  pointer-events: none;
+  user-select: none;
+  position: absolute;
+  top: 0;
+  left: 0;
   opacity: 0;
-  body[data-status="enter"] & {
-    transition: 0.6s 0.4s ease opacity;
-    opacity: 1;
+  width: liquid(900 * 0.5);
+  height: liquid(540 * 0.5);
+  @include sp_w() {
+    width: liquid(900 * 0.3);
+    height: liquid(540 * 0.3);
   }
 }
 
-// ボタン
-.c-btn {
+// --------------------------
+
+// アイテムリスト
+
+// --------------------------
+.c-itemList {
+  @include hover() {
+    .c-item__number,
+    .c-item__label,
+    .c-item__arrow {
+      opacity: 0.3;
+    }
+    .c-item.is-active {
+      .c-item__number,
+      .c-item__label,
+      .c-item__arrow {
+        opacity: 1;
+      }
+    }
+  }
+}
+.c-itemList__box {
+}
+.c-item {
   cursor: pointer;
   position: relative;
   z-index: 0;
   display: flex;
   align-items: center;
-  justify-content: center;
-  background: initial;
-  width: max(24px, liquid(24));
-  height: max(24px, liquid(24));
-  border: solid max(2px, liquid(2)) var(--white);
-  font-size: max(10px, liquid(10));
-  @include sp_w() {
-    width: min(32px, liquid(32));
-    height: min(32px, liquid(32));
-    border: solid min(2px, liquid(2)) var(--white);
-  }
-
-  opacity: 1;
-  @include hover() {
-    transition: 0.4s ease opacity;
-    opacity: 0.5;
-  }
-}
-.c-btn__bg {
-  pointer-events: none;
-  user-select: none;
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 0;
-  margin: auto;
-  width: 101%;
-  height: 101%;
-  transform: scale(1, 0);
-  transform-origin: bottom;
-  background: var(--white);
-  transition: 0.4s $easeinout transform;
-}
-.c-btn__text {
-  pointer-events: none;
-  user-select: none;
-  position: relative;
-  z-index: 2;
-  color: var(--white);
-  font-size: max(10px, liquid(10));
-  width: max-content;
-  height: max-content;
-  margin: 0;
-  mix-blend-mode: difference;
-  @include sp_w() {
-    font-size: min(10px, liquid(10));
-  }
-}
-
-// ボタン next
-.c-btn-next {
-  &.is-active {
-    .c-btn__bg {
-      transform: scale(1, 1);
-      transition: 3s linear transform;
-    }
-  }
-}
-
-// ナビ
-.c-navi {
-  position: relative;
-  cursor: pointer;
-  width: max(24px, liquid(24));
-  height: max(8px, liquid(8));
-  border: solid max(1px, liquid(1)) var(--white);
+  gap: 12px;
+  padding: 64px 32px;
+  border-left: solid 2px var(--white-solid);
+  border-right: solid 2px var(--white-solid);
+  border-top: solid 1px var(--white-solid);
+  border-bottom: solid 1px var(--white-solid);
   box-sizing: border-box;
-  transition: 0.4s ease opacity;
-  background: rgba(#fff, 0);
-  @include pc_w() {
-    margin: auto;
-    margin-top: max(8px, liquid(8));
-
-    &:nth-of-type(1) {
-      margin-top: 0;
-    }
-  }
   @include sp_w() {
-    width: min(32px, liquid(32));
-    height: min(32px, liquid(32));
-    border: solid min(2px, liquid(2)) var(--white);
+    padding: 54px 24px;
   }
-  &::before {
-    pointer-events: none;
-    user-select: none;
-    content: "";
-    position: absolute;
-    top: 0%;
-    left: 0%;
-    right: 0;
-    bottom: 0;
-    z-index: 0;
-    margin: auto;
-    width: 102%;
-    height: 102%;
-    background: var(--white);
-    transform: scale(1, 0);
-    transform-origin: bottom;
-    transition: 1.2s $easeinout transform;
+  @include hover() {
+    .c-item__number,
+    .c-item__label,
+    .c-item__arrow {
+      opacity: 1;
+    }
   }
 
   &.is-active {
-    &::before {
-      transform: scale(1, 1);
+    .c-item__number,
+    .c-item__label,
+    .c-item__arrow {
+      opacity: 1;
+    }
+    .c-item__arrow {
+      transform: rotateZ(45deg);
     }
   }
-  @include hover() {
-    opacity: 0.5;
+}
+.c-item__number,
+.c-item__label,
+.c-item__arrow {
+  pointer-events: none;
+  user-select: none;
+}
+.c-item__number {
+  color: var(--white);
+  font-size: 16px;
+  font-weight: 700;
+}
+.c-item__label {
+  color: var(--white);
+  font-size: 16px;
+  font-weight: 700;
+}
+.c-item__arrow {
+  color: var(--white);
+  font-size: 28px;
+  font-weight: 700;
+  margin-left: auto;
+  transition: 0.2s ease opacity, 0.2s ease transform;
+}
+.c-item__number,
+.c-item__label {
+  opacity: 1;
+  transition: 0.2s ease opacity;
+}
+.c-item__img {
+  display: none;
+  visibility: hidden;
+  img {
   }
 }
 
 // --------------------------
 
-// タイトル
+// footer
 
 // --------------------------
-.c-title {
-  pointer-events: none;
-  user-select: none;
-  position: fixed;
-  top: max(20px, liquid(20));
-  left: max(20px, liquid(20));
-  z-index: 5000;
-  @include sp_w() {
-    top: min(12px, liquid(12));
-    left: min(12px, liquid(12));
-  }
-  span {
-    display: inline-block;
-    font-family: var(--ja);
-    line-height: 100%;
-    font-weight: bold;
-    width: max-content;
-    color: var(--white);
-
-    &:nth-of-type(1) {
-      font-size: max(54px, liquid(54));
-      letter-spacing: max(-2px, liquid(-2));
-      @include sp_w() {
-        font-size: min(32px, liquid(32));
-        letter-spacing: max(-2px, liquid(-2));
-      }
-    }
-    &:nth-of-type(2) {
-      font-size: max(24px, liquid(24));
-      line-height: 160%;
-      @include sp_w() {
-        font-size: min(20px, liquid(20));
-      }
-    }
-  }
+.l-footer {
+  position: relative;
+  z-index: 10;
+  border-left: solid 2px var(--white-solid);
+  border-right: solid 2px var(--white-solid);
+  border-top: solid 1px var(--white-solid);
+  border-bottom: solid 2px var(--white-solid);
+  box-sizing: border-box;
+  width: 100vw;
+  height: 64px;
 }
 
 // --------------------------
@@ -428,13 +245,13 @@ button {
 .c-copyright {
   user-select: none;
   position: fixed;
-  bottom: max(16px, liquid(16));
+  bottom: 24px;
   left: 0;
   right: 0;
   margin: auto;
   z-index: 2000;
   display: block;
-  font-size: max(12px, liquid(12));
+  font-size: 12px;
   font-family: var(--ja);
   line-height: 100%;
   font-weight: bold;
@@ -444,8 +261,6 @@ button {
   @include sp_w() {
     right: 0;
     left: 0;
-    bottom: min(16px, liquid(16));
-    font-size: min(12px, liquid(12));
     margin: auto;
   }
   &::before {
@@ -453,7 +268,7 @@ button {
     user-select: none;
     content: "";
     position: absolute;
-    bottom: max(-6px, liquid(-6));
+    bottom: -6px;
     left: 0;
     z-index: 0;
     transform: translate3d(0, 0, 0px);
@@ -464,7 +279,7 @@ button {
     transform-origin: left;
     transition: 0.4s $easeinout transform;
     @include sp_w() {
-      bottom: min(-4px, liquid(-4));
+      bottom: -4px;
     }
   }
   @include hover() {
@@ -486,18 +301,10 @@ button {
 // --------------------------
 .c-github {
   user-select: none;
-  position: fixed;
-  right: max(16px, liquid(16));
-  bottom: max(16px, liquid(20));
-  z-index: 2000;
-  width: max(20px, liquid(20));
-  height: max(20px, liquid(20));
+  width: 20px;
+  height: 20px;
   display: flex;
   align-items: center;
-  @include sp_w() {
-    bottom: min(12px, liquid(12));
-    right: min(12px, liquid(12));
-  }
   svg {
     pointer-events: none;
     user-select: none;
@@ -510,5 +317,8 @@ button {
   body[data-status="enter"] & {
     transition: 0.4s ease opacity;
     opacity: 1;
+    @include hover() {
+      opacity: 0.5;
+    }
   }
 }
