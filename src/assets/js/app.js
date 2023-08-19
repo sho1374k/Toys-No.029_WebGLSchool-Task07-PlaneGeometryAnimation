@@ -55,8 +55,10 @@ window.addEventListener("DOMContentLoaded", (e) => {
 
     webgl.resize(params);
   };
-  resize();
   window.addEventListener("resize", resize, { passive: true });
+  setTimeout(() => {
+    resize();
+  }, 300);
 
   if (bool.isMatchMediaHover) {
     // 右クリック禁止

@@ -68,8 +68,8 @@ export class WebGL {
   }
 
   resize(params) {
-    this.params.w = this.params.w;
-    this.params.h = this.params.h;
+    this.params.w = params.w;
+    this.params.h = params.h;
 
     this.stage.resize(params.w, params.h);
     this.plane.resize(params);
