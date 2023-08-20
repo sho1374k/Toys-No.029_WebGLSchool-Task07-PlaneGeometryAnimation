@@ -211,12 +211,12 @@ export class ObjectPlane extends Object {
         const y = v.y.current;
 
         // subtracts vector
-        this.curve.x.current = x - this.curve.x.target;
-        this.curve.y.current = y - this.curve.y.target;
+        this.curve.x.current = this.curve.x.target - x;
+        this.curve.y.current = this.curve.y.target - y;
 
         // multiply scalar
-        this.curve.x.current *= this.curve.power * -1;
-        this.curve.y.current *= this.curve.power * -1;
+        this.curve.x.current *= this.curve.power;
+        this.curve.y.current *= this.curve.power;
 
         this.updateUniform("uCurve", "v2", [this.curve.x.current, this.curve.y.current]);
       };
